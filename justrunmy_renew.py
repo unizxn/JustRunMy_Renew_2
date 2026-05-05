@@ -9,15 +9,15 @@ import requests
 from seleniumbase import SB
 
 LOGIN_URL = "https://justrunmy.app/id/Account/Login"
-DOMAIN    = "justrunmy.app"
+DOMAIN = "justrunmy.app"
 
 # ============================================================
-#  环境变量与全局变量
+# 环境变量与全局变量
 # ============================================================
-EMAIL        = os.environ.get("JUSTRUNMY_EMAIL")
-PASSWORD     = os.environ.get("JUSTRUNMY_PASSWORD")
+EMAIL = os.environ.get("JUSTRUNMY_EMAIL")
+PASSWORD = os.environ.get("JUSTRUNMY_PASSWORD")
 TG_BOT_TOKEN = os.environ.get("TG_BOT_TOKEN")
-TG_CHAT_ID   = os.environ.get("TG_CHAT_ID")
+TG_CHAT_ID = os.environ.get("TG_CHAT_ID")
 
 if not EMAIL or not PASSWORD:
     print("❌ 致命错误：未找到 JUSTRUNMY_EMAIL 或 JUSTRUNMY_PASSWORD 环境变量！")
@@ -28,7 +28,7 @@ if not EMAIL or not PASSWORD:
 DYNAMIC_APP_NAME = "未知应用"
 
 # ============================================================
-#  Telegram 推送模块
+# Telegram 推送模块
 # ============================================================
 def send_tg_message(status_icon, status_text, time_left):
     if not TG_BOT_TOKEN or not TG_CHAT_ID:
@@ -52,18 +52,18 @@ def send_tg_message(status_icon, status_text, time_left):
         "chat_id": TG_CHAT_ID,
         "text": text
     }
-    
+
     try:
         r = requests.post(url, json=payload, timeout=10)
         if r.status_code == 200:
-            print("  📩 Telegram 通知发送成功！")
+            print(" 📩 Telegram 通知发送成功！")
         else:
-            print(f"  ⚠️ Telegram 通知发送失败: {r.text}")
+            print(f" ⚠️ Telegram 通知发送失败: {r.text}")
     except Exception as e:
-        print(f"  ⚠️ Telegram 通知发送异常: {e}")
+        print(f" ⚠️ Telegram 通知发送异常: {e}")
 
 # ============================================================
-#  页面注入脚本
+# 页面注入脚本
 # ============================================================
 _EXPAND_JS = """
 (function() {
@@ -140,7 +140,7 @@ _WININFO_JS = """
 """
 
 # ============================================================
-#  底层输入工具
+# 底层输入工具
 # ============================================================
 def js_fill_input(sb, selector: str, text: str):
     safe_text = text.replace('\\', '\\\\').replace('"', '\\"')
@@ -185,34 +185,34 @@ def _xdotool_click(x: int, y: int):
         os.system(f"xdotool mousemove {x} {y} click 1 2>/dev/null")
 
 # ============================================================
-#  人机验证处理
+# 人机验证处理
 # ============================================================
 def _click_turnstile(sb):
     try:
         coords = sb.execute_script(_COORDS_JS)
     except Exception as e:
-        print(f"  ⚠️ 获取 Turnstile 坐标失败: {e}")
+        print(f" ⚠️ 获取 Turnstile 坐标失败: {e}")
         return
     if not coords:
-        print("  ⚠️ 无法定位 Turnstile 坐标")
+        print(" ⚠️ 无法定位 Turnstile 坐标")
         return
     try:
         wi = sb.execute_script(_WININFO_JS)
     except Exception:
         wi = {"sx": 0, "sy": 0, "oh": 800, "ih": 768}
-        
+
     bar = wi["oh"] - wi["ih"]
-    ax  = coords["cx"] + wi["sx"]
-    ay  = coords["cy"] + wi["sy"] + bar
-    print(f"  🖱️ 物理级点击 Turnstile ({ax}, {ay})")
+    ax = coords["cx"] + wi["sx"]
+    ay = coords["cy"] + wi["sy"] + bar
+    print(f" 🖱️ 物理级点击 Turnstile ({ax}, {ay})")
     _xdotool_click(ax, ay)
 
 def handle_turnstile(sb) -> bool:
     print("🔍 处理 Cloudflare Turnstile 验证...")
     time.sleep(2)
-    
+
     if sb.execute_script(_SOLVED_JS):
-        print("  ✅ 已静默通过")
+        print(" ✅ 已静默通过")
         return True
 
     for _ in range(3):
@@ -222,26 +222,26 @@ def handle_turnstile(sb) -> bool:
 
     for attempt in range(6):
         if sb.execute_script(_SOLVED_JS):
-            print(f"  ✅ Turnstile 通过（第 {attempt + 1} 次尝试）")
+            print(f" ✅ Turnstile 通过（第 {attempt + 1} 次尝试）")
             return True
         try: sb.execute_script(_EXPAND_JS)
         except Exception: pass
         time.sleep(0.3)
-        
+
         _click_turnstile(sb)
-        
+
         for _ in range(8):
             time.sleep(0.5)
             if sb.execute_script(_SOLVED_JS):
-                print(f"  ✅ Turnstile 通过（第 {attempt + 1} 次尝试）")
+                print(f" ✅ Turnstile 通过（第 {attempt + 1} 次尝试）")
                 return True
-        print(f"  ⚠️ 第 {attempt + 1} 次未通过，重试...")
+        print(f" ⚠️ 第 {attempt + 1} 次未通过，重试...")
 
-    print("  ❌ Turnstile 6 次均失败")
+    print(" ❌ Turnstile 6 次均失败")
     return False
 
 # ============================================================
-#  账户登录模块
+# 账户登录模块
 # ============================================================
 def login(sb) -> bool:
     print(f"🌐 打开登录页面: {LOGIN_URL}")
@@ -268,7 +268,7 @@ def login(sb) -> bool:
     print(f"📧 填写邮箱...")
     js_fill_input(sb, 'input[name="Email"]', EMAIL)
     time.sleep(0.3)
-    
+
     print("🔑 填写密码...")
     js_fill_input(sb, 'input[name="Password"]', PASSWORD)
     time.sleep(1)
@@ -293,21 +293,21 @@ def login(sb) -> bool:
     if sb.get_current_url().split('?')[0].lower() != LOGIN_URL.lower():
         print("✅ 登录成功！")
         return True
-        
+
     print("❌ 登录失败，页面没有跳转。")
     sb.save_screenshot("login_failed.png")
     return False
 
 # ============================================================
-#  自动续期模块 (动态抓取名称 + TG 通知)
+# 自动续期模块 (动态抓取名称 + TG 通知)
 # ============================================================
 def renew(sb) -> bool:
     global DYNAMIC_APP_NAME
-    
+
     print("\n" + "="*50)
-    print("   🚀 开始自动续期流程")
+    print(" 🚀 开始自动续期流程")
     print("="*50)
-    
+
     print("🌐 进入控制面板: https://justrunmy.app/panel")
     sb.open("https://justrunmy.app/panel")
     time.sleep(3)
@@ -319,7 +319,7 @@ def renew(sb) -> bool:
         # 从网页中抓取真实的名称并保存到全局变量
         DYNAMIC_APP_NAME = sb.get_text('h3.font-semibold')
         print(f"🎯 成功抓取到应用名称: {DYNAMIC_APP_NAME}")
-        
+
         # 直接点击刚才抓取到的元素
         sb.click('h3.font-semibold')
         time.sleep(3)
@@ -354,7 +354,7 @@ def renew(sb) -> bool:
     try:
         sb.click('button:contains("Just Reset")')
         print("⏳ 提交续期请求，等待服务器处理...")
-        time.sleep(5) 
+        time.sleep(5)
     except Exception as e:
         print(f"❌ 找不到 Just Reset 按钮: {e}")
         sb.save_screenshot("renew_just_reset_not_found.png")
@@ -368,7 +368,7 @@ def renew(sb) -> bool:
         # 根据页面结构获取剩余时间文本
         timer_text = sb.get_text('span.font-mono.text-xl')
         print(f"⏱️ 当前应用剩余时间: {timer_text}")
-        
+
         if "2 days 23" in timer_text or "3 days" in timer_text:
             print("✅ 完美！续期任务圆满完成！")
             sb.save_screenshot("renew_success.png")
@@ -378,7 +378,7 @@ def renew(sb) -> bool:
             print("⚠️ 倒计时似乎没有重置到最高值，请人工检查截图确认。")
             sb.save_screenshot("renew_warning.png")
             send_tg_message("⚠️", "续期异常(请检查)", timer_text)
-            return True 
+            return True
     except Exception as e:
         print(f"⚠️ 读取倒计时失败，但流程已执行完毕: {e}")
         sb.save_screenshot("renew_timer_read_fail.png")
@@ -386,23 +386,24 @@ def renew(sb) -> bool:
         return False
 
 # ============================================================
-#  脚本执行入口
+# 脚本执行入口
 # ============================================================
 def main():
     print("=" * 50)
-    print("   JustRunMy.app 自动登录与续期脚本")
+    print(" JustRunMy.app 自动登录与续期脚本")
     print("=" * 50)
-    
-    use_proxy = os.environ.get("USE_PROXY", "false").lower() == "true"
+
+    # ====== 代理配置（来自第二个项目）======
+    proxy_url_env = os.environ.get("PROXY_URL", "").strip()
     sb_kwargs = {"uc": True, "test": True, "headless": False}
-    
-    if use_proxy:
-        proxy_str = "http://127.0.0.1:8080"
-        print(f"🔗 挂载 Gost 代理: {proxy_str}")
-        sb_kwargs["proxy"] = proxy_str
+
+    if proxy_url_env:
+        local_proxy = "http://127.0.0.1:8080"
+        print(f"🔗 检测到代理配置，挂载本地通道: {local_proxy}")
+        sb_kwargs["proxy"] = local_proxy
     else:
-        print("🌐 未使用代理，直连访问")
-    
+        print("🌐 未配置 PROXY_URL，将尝试直连访问")
+
     with SB(**sb_kwargs) as sb:
         print("✅ 浏览器已启动")
         try:
