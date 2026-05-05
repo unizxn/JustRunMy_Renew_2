@@ -18,6 +18,13 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: 🛠️ 安装自动化依赖
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb x11-utils xdotool fonts-noto-cjk
+          pip install seleniumbase requests
+          seleniumbase install chromedriver
+
       - name: 🛡️ 启动 sing-box 代理
         env:
           PROXY_URL: ${{ secrets.PROXY_URL }}
@@ -46,13 +53,6 @@ jobs:
           export https_proxy=http://127.0.0.1:8080
           curl -s --connect-timeout 10 https://api.ipify.org || echo "无法获取出口 IP"
 
-      - name: 🛠️ 安装自动化依赖
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb x11-utils xdotool fonts-noto-cjk
-          pip install seleniumbase requests
-          seleniumbase install chromedriver
-
       - name: 🚀 运行续期脚本
         env:
           JUSTRUNMY_EMAIL: ${{ secrets.JUSTRUNMY_EMAIL }}
@@ -62,8 +62,7 @@ jobs:
           PROXY_URL: ${{ secrets.PROXY_URL }}
         run: |
           # 启动虚拟显示器并执行脚本
-          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
-            python justrunmy_renew.py
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24"             python justrunmy_renew.py
 
       - name: 📸 错误截图上传
         if: failure()
