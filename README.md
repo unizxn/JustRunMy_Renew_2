@@ -28,7 +28,7 @@
 |---|---|---|---|
 | `JUSTRUNMY_EMAIL` | ✅ | `user@example.com` | JustRunMy 登录邮箱 |
 | `JUSTRUNMY_PASSWORD` | ✅ | `your_password` | JustRunMy 登录密码 |
-| `PROXY_URL` | ❌ | `vless://uuid@host:port?...` | 代理链接（支持全协议） |
+| `PROXY_URL` | ❌ | `socks5://user:pass@host:port` | 代理链接（支持全协议） |
 | `TG_BOT_TOKEN` | ❌ | `123456:ABC...` | Telegram Bot Token |
 | `TG_CHAT_ID` | ❌ | `987654321` | Telegram 用户/群组 Chat ID |
 
