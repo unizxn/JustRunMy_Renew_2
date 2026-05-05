@@ -143,7 +143,7 @@ _WININFO_JS = """
 # 底层输入工具
 # ============================================================
 def js_fill_input(sb, selector: str, text: str):
-    safe_text = text.replace('\\', '\\\\').replace('"', '\\"')
+    safe_text = text.replace('\\', '\\\\').replace('"', '\"')
     sb.execute_script(f"""
     (function(){{
         var el = document.querySelector('{selector}');
@@ -408,7 +408,12 @@ def main():
         print("✅ 浏览器已启动")
         try:
             sb.open("https://api.ipify.org/?format=json")
-            print(f"🌐 当前出口真实 IP: {sb.get_text('body')}")
+            ip_text = sb.get_text('body')
+            if ip_text:
+                # 公开仓库中隐藏真实 IP，防止泄露代理节点信息
+                print("🌐 代理已启用，出口 IP 已隐藏")
+            else:
+                print("⚠️ 无法获取出口 IP 信息")
         except Exception:
             pass
 
