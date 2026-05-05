@@ -3,8 +3,8 @@ name: JustRunMy 自动续期
 on:
   workflow_dispatch:
   schedule:
-    # 每天北京时间 05:00 (UTC 21:00) 触发
-    - cron: '0 21 * * *'
+    # 每天北京时间 06:00 (UTC 22:00) 触发
+    - cron: '0 22 * * *'
 
 jobs:
   renew:
@@ -48,10 +48,11 @@ jobs:
           nohup ./sing-box run -c config.json > singbox.log 2>&1 &
           sleep 5
 
-          echo "🔍 验证代理出口..."
+          # 只验证代理连通性，不打印真实 IP（防止公开仓库泄露节点信息）
+          echo "🔍 验证代理连通性..."
           export http_proxy=http://127.0.0.1:8080
           export https_proxy=http://127.0.0.1:8080
-          curl -s --connect-timeout 10 https://api.ipify.org || echo "无法获取出口 IP"
+          curl -s --connect-timeout 10 -o /dev/null -w "%{http_code}" https://api.ipify.org | grep -q "200" && echo "✅ 代理连通性正常" || echo "⚠️ 代理验证失败"
 
       - name: 🚀 运行续期脚本
         env:
@@ -62,7 +63,8 @@ jobs:
           PROXY_URL: ${{ secrets.PROXY_URL }}
         run: |
           # 启动虚拟显示器并执行脚本
-          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24"             python justrunmy_renew.py
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
+            python justrunmy_renew.py
 
       - name: 📸 错误截图上传
         if: failure()
