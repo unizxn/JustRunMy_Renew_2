@@ -298,11 +298,10 @@ def main():
     with open("config.json", "w") as f:
         json.dump(config, f, indent=2, ensure_ascii=False)
 
-    server = outbound.get("server", "N/A")
-    port = outbound.get("server_port", "N/A")
+    # 隐藏代理服务器真实地址，防止在公开 Actions 日志中泄露
     print(f"sing-box config.json generated.")
     print(f"  Inbound: http://{LISTEN_HOST}:{LISTEN_PORT}")
-    print(f"  Outbound: {outbound['type']} -> {server}:{port}")
+    print(f"  Outbound: {outbound['type']} -> ***:***")
 
 if __name__ == "__main__":
     main()
